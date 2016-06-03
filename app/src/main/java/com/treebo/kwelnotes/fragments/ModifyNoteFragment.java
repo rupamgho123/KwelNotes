@@ -25,6 +25,8 @@ public class ModifyNoteFragment extends BaseFragment {
   @Bind(R.id.content) EditText content;
   @Bind(R.id.title) EditText title;
   @Bind(R.id.delete_note_button) Button deleteNoteButton;
+  @Bind(R.id.edit_note_button) Button editNoteButton;
+  @Bind(R.id.save_note_button) Button saveNoteButton;
   NotesDao notesDao;
   long id;
 
@@ -42,15 +44,17 @@ public class ModifyNoteFragment extends BaseFragment {
     if (arguments != null) {
       id = arguments.getLong("id");
       if (id != 0) {
+        enableEditTexts(false);
         Note note = notesDao.getNoteById(id);
         content.setText(note.content);
         title.setText(note.title);
         toolbar.setTitle("Modify Note");
-        deleteNoteButton.setVisibility(View.VISIBLE);
+        editNoteButton.setVisibility(View.VISIBLE);
         return;
       }
     }
     toolbar.setTitle("Create a note");
+    saveNoteButton.setVisibility(View.VISIBLE);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -79,5 +83,22 @@ public class ModifyNoteFragment extends BaseFragment {
     notesDao.deleteNote(id);
     showToast("Note deleted successfully");
     getFragmentManager().popBackStackImmediate();
+  }
+
+  @OnClick(R.id.edit_note_button) public void onEditClicked(View v){
+    enableEditTexts(true);
+    editNoteButton.setVisibility(View.GONE);
+    saveNoteButton.setVisibility(View.VISIBLE);
+    deleteNoteButton.setVisibility(View.VISIBLE);
+  }
+
+  private void enableEditTexts(boolean enable){
+    content.setFocusable(enable);
+    content.setFocusableInTouchMode(enable);
+    content.setClickable(enable);
+
+    title.setFocusable(enable);
+    title.setFocusableInTouchMode(enable);
+    title.setClickable(enable);
   }
 }

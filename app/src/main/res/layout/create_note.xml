@@ -40,10 +40,16 @@
         android:id="@+id/content"
         android:hint="@string/type_here"
         />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
     <Button
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:id="@+id/save_note_button"
+        android:visibility="gone"
         android:text="@string/save_note"
         />
     <Button
@@ -53,6 +59,14 @@
         android:visibility="gone"
         android:text="@string/delete_note"
         />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:visibility="gone"
+        android:text="@string/edit_note"
+        android:id="@+id/edit_note_button"
+        />
+    </LinearLayout>
   </LinearLayout>
   </android.support.v4.widget.NestedScrollView>
 
