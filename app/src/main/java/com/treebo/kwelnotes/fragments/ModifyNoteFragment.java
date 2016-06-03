@@ -12,6 +12,9 @@ import butterknife.Bind;
 import butterknife.OnClick;
 import com.treebo.kwelnotes.R;
 import com.treebo.kwelnotes.Utils;
+import com.treebo.kwelnotes.asynctasks.CreateNoteTask;
+import com.treebo.kwelnotes.asynctasks.DeleteNoteTask;
+import com.treebo.kwelnotes.asynctasks.ModifyNoteTask;
 import com.treebo.kwelnotes.dao.NotesDaoImpl;
 import com.treebo.kwelnotes.datamodels.Note;
 import com.treebo.kwelnotes.interfaces.NotesDao;
@@ -19,7 +22,9 @@ import com.treebo.kwelnotes.interfaces.NotesDao;
 /**
  * Created by rupam.ghosh on 03/06/16.
  */
-public class ModifyNoteFragment extends BaseFragment {
+public class ModifyNoteFragment extends BaseFragment implements
+    DeleteNoteTask.DeleteNoteTaskListener, CreateNoteTask.CreateNoteTaskListener,
+    ModifyNoteTask.ModifyNoteTaskListener{
   public static final String TAG = ModifyNoteFragment.class.getName();
   @Bind(R.id.toolbar) Toolbar toolbar;
   @Bind(R.id.content) EditText content;
@@ -27,13 +32,11 @@ public class ModifyNoteFragment extends BaseFragment {
   @Bind(R.id.delete_note_button) Button deleteNoteButton;
   @Bind(R.id.edit_note_button) Button editNoteButton;
   @Bind(R.id.save_note_button) Button saveNoteButton;
-  NotesDao notesDao;
   long id;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    notesDao = new NotesDaoImpl();
     return inflater.inflate(R.layout.create_note, container, false);
   }
 
@@ -45,7 +48,7 @@ public class ModifyNoteFragment extends BaseFragment {
       id = arguments.getLong("id");
       if (id != 0) {
         enableEditTexts(false);
-        Note note = notesDao.getNoteById(id);
+        Note note = new NotesDaoImpl().getNoteById(id);
         content.setText(note.content);
         title.setText(note.title);
         toolbar.setTitle("Modify Note");
@@ -69,20 +72,15 @@ public class ModifyNoteFragment extends BaseFragment {
       showSnackbar("Content cannot be empty");
     } else {
       if (id != 0) {
-        notesDao.modifyNote(id,title.getText().toString(), content.getText().toString());
-        showToast("Note modified successfully");
+        new ModifyNoteTask(this,id,title.getText().toString(), content.getText().toString()).execute();
       }else {
-        notesDao.createNote(title.getText().toString(), content.getText().toString());
-        showToast("Note created successfully");
+        new CreateNoteTask(this,title.getText().toString(), content.getText().toString()).execute();
       }
-      getFragmentManager().popBackStackImmediate();
     }
   }
 
   @OnClick(R.id.delete_note_button) public void onDeleteClicked(View v){
-    notesDao.deleteNote(id);
-    showToast("Note deleted successfully");
-    getFragmentManager().popBackStackImmediate();
+    new DeleteNoteTask(id,this).execute();
   }
 
   @OnClick(R.id.edit_note_button) public void onEditClicked(View v){
@@ -100,5 +98,20 @@ public class ModifyNoteFragment extends BaseFragment {
     title.setFocusable(enable);
     title.setFocusableInTouchMode(enable);
     title.setClickable(enable);
+  }
+
+  @Override public void onDeleteNote() {
+    showToast("Note deleted successfully");
+    getFragmentManager().popBackStackImmediate();
+  }
+
+  @Override public void onNoteCreated() {
+    showToast("Note created successfully");
+    getFragmentManager().popBackStackImmediate();
+  }
+
+  @Override public void onNoteModified() {
+    showToast("Note modified successfully");
+    getFragmentManager().popBackStackImmediate();
   }
 }
